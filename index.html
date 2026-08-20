@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Markdown to Word</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">M→W</span>
+      <span class="brand-name">Markdown to Word</span>
+    </div>
+    <div class="actions">
+      <button id="btnUpload" class="btn btn-ghost">Upload .md file</button>
+      <button id="btnClear" class="btn btn-ghost">Clear</button>
+      <span class="divider"></span>
+      <button id="btnExportDocx" class="btn btn-primary">Export Word (.docx)</button>
+      <button id="btnExportPdf" class="btn btn-secondary">Export PDF</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="pane">
+      <div class="pane-header">Markdown</div>
+      <textarea id="editor" spellcheck="false" placeholder="Paste your markdown here, or click &quot;Upload .md file&quot; above..."></textarea>
+    </section>
+
+    <section class="pane">
+      <div class="pane-header">Preview</div>
+      <div id="preview" class="preview"></div>
+    </section>
+  </main>
+
+  <footer class="statusbar">
+    <span id="status">Ready</span>
+  </footer>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
