@@ -14,9 +14,9 @@ function setStatus(msg, isError = false) {
   status.style.color = isError ? '#dc2626' : '#6b7280';
 }
 
-function renderPreview() {
+async function renderPreview() {
   const text = editor.value;
-  preview.innerHTML = window.api.renderMarkdown(text);
+  preview.innerHTML = await window.api.renderMarkdown(text);
 }
 
 function scheduleRender() {
@@ -60,9 +60,8 @@ btnExportDocx.addEventListener('click', async () => {
   setStatus('Exporting to Word...');
   btnExportDocx.disabled = true;
   try {
-    const html = window.api.renderMarkdown(editor.value);
     const suggestedName = deriveFileNameFromContent(editor.value);
-    const result = await window.api.exportDocx(html, suggestedName);
+    const result = await window.api.exportDocx(editor.value, suggestedName);
     if (result.canceled) {
       setStatus('Export canceled.');
     } else {
@@ -84,7 +83,7 @@ btnExportPdf.addEventListener('click', async () => {
   setStatus('Exporting to PDF...');
   btnExportPdf.disabled = true;
   try {
-    const html = window.api.renderMarkdown(editor.value);
+    const html = await window.api.renderMarkdown(editor.value);
     const suggestedName = deriveFileNameFromContent(editor.value);
     const result = await window.api.exportPdf(html, suggestedName);
     if (result.canceled) {

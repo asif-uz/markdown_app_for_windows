@@ -7,12 +7,13 @@
   "license": "MIT",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --win",
+    "dist": "electron-builder --win --publish never",
     "dist:portable": "electron-builder --win portable",
     "dist:dir": "electron-builder --win dir"
   },
   "dependencies": {
     "html-to-docx": "^1.8.0",
+    "katex": "^0.18.4",
     "markdown-it": "^14.1.0"
   },
   "devDependencies": {
@@ -27,10 +28,12 @@
     },
     "files": [
       "main.js",
+      "math.js",
       "preload.js",
       "index.html",
       "renderer.js",
       "styles.css",
+      "vendor/**/*",
       "node_modules/**/*"
     ],
     "win": {
