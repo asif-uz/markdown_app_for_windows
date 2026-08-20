@@ -85,7 +85,8 @@ async function rasterizeMathToImages(mathBlocks) {
     <style>body{margin:0;background:#ffffff;font-size:${16 * SCALE}px;}</style>
   </head><body>${wrappers}</body></html>`;
 
-  const win = new BrowserWindow({ show: false, width: 2800, height: 800 });
+  const WIDTH = 2800;
+  const win = new BrowserWindow({ show: false, width: WIDTH, height: 800 });
   try {
     await win.loadURL('data:text/html;charset=UTF-8,' + encodeURIComponent(pageHtml));
     // Wait for KaTeX's web fonts to actually finish loading before measuring
@@ -96,6 +97,15 @@ async function rasterizeMathToImages(mathBlocks) {
     await win.webContents.executeJavaScript(
       'document.fonts.ready.then(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))'
     );
+
+    // The window starts at a fixed, modest height, but a document can have
+    // any number of stacked equations. capturePage() only captures what's
+    // actually been painted, which is clipped to the window's own size --
+    // any equation below that cutoff silently captures as a 0-byte image
+    // (which then crashes html-to-docx's base64 parsing entirely). Resize
+    // the window to fit the full stacked content before capturing anything.
+    const contentHeight = await win.webContents.executeJavaScript('document.body.scrollHeight');
+    win.setContentSize(WIDTH, Math.ceil(contentHeight) + 50);
 
     for (let i = 0; i < mathBlocks.length; i += 1) {
       const { token, latex } = mathBlocks[i];
@@ -111,6 +121,12 @@ async function rasterizeMathToImages(mathBlocks) {
           width: Math.ceil(rect.width) + pad * 2,
           height: Math.ceil(rect.height) + pad * 2,
         });
+        // A capture that comes back empty (e.g. the requested rect fell
+        // outside what was actually painted) produces a "data:image/png;
+        // base64," data URL with nothing after the comma, which crashes
+        // html-to-docx outright when it tries to parse the payload -- so
+        // this must be caught here rather than left for that to hit.
+        if (image.isEmpty()) throw new Error('empty capture');
         const dataUrl = image.toDataURL();
         const w = Math.max(1, Math.round((rect.width + pad * 2) / SCALE));
         const h = Math.max(1, Math.round((rect.height + pad * 2) / SCALE));
