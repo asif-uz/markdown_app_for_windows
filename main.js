@@ -2,6 +2,14 @@ const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs/promises');
 const HTMLtoDOCX = require('html-to-docx');
+const MarkdownIt = require('markdown-it');
+
+const md = new MarkdownIt({
+  html: false,       // don't allow raw HTML in the source markdown (safety)
+  linkify: true,      // auto-detect URLs
+  typographer: true,  // nicer quotes/dashes
+  breaks: false,
+});
 
 let mainWindow;
 
@@ -32,6 +40,15 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
+});
+
+// ---- Render markdown to HTML ----
+// This runs in the (unsandboxed) main process because preload scripts are
+// sandboxed by default in Electron 20+, which blocks require() of
+// third-party npm packages like markdown-it. Doing the render here avoids
+// that restriction entirely.
+ipcMain.handle('render-markdown', (event, text) => {
+  return md.render(text || '');
 });
 
 // ---- Open a .md file from disk ----
