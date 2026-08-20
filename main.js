@@ -93,7 +93,20 @@ ipcMain.handle('export-docx', async (event, { html, suggestedName }) => {
     pageNumber: false,
     font: 'Calibri',
     fontSize: 22, // half-points -> 11pt
-    margins: { top: 1440, bottom: 1440, left: 1440, right: 1440 }, // 1 inch
+    margins: {
+      top: 1440,
+      bottom: 1440,
+      left: 1440,
+      right: 1440,
+      // html-to-docx has no fallback for these and writes the literal
+      // string "undefined" into word/document.xml's <w:pgMar> if they're
+      // left out, which produces a .docx Word refuses to open ("problems
+      // with the contents"). Standard Word defaults: 0.5" header/footer
+      // distance, no gutter.
+      header: 720,
+      footer: 720,
+      gutter: 0,
+    },
   });
 
   await fs.writeFile(result.filePath, fileBuffer);
